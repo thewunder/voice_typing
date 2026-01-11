@@ -1,0 +1,15 @@
+[Unit]
+Description=Whisper Server
+After=network.target
+
+[Service]
+Type=simple
+User=youruser
+Group=youruser
+WorkingDirectory=/tmp
+ExecStart=/usr/local/bin/whisper-server -l en -vm /usr/local/bin/models/ggml-silero-v6.2.0.bin --vad -m /usr/local/bin/models/ggml-medium.en.bin --convert --port 7777
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
