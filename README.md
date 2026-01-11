@@ -73,7 +73,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable ydotoold.service # later changed to ydotool.service
 sudo systemctl start ydotoold.service
 ```
-For quick troubleshooting
+For quick troubleshooting 
 ```
 sudo systemctl status ydotoold  # Should show "Active: active (running)"
 journalctl -u ydotoold -b | tail -n 20
