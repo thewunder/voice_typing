@@ -17,6 +17,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
+# Configuration
+SERVER_URL="http://127.0.0.1:7777/inference"
+SILENCE_THRESHOLD="4%"   # volume level considered silence
+SILENCE_DURATION="1.5"   # seconds of silence before stopping
+
 # fifo queue to hold temporary audio file names
 audio_fifo=$(mktemp); rm "$audio_fifo" ; mkfifo "$audio_fifo"
 
@@ -30,7 +35,7 @@ trap cleanup 0
 trans(){
     while read audio; do
         # Send audio file to whisper.cpp using curl
-        curl_output=$(curl -s "http://127.0.0.1:7777/inference" \
+        curl_output=$(curl -s "$SERVER_URL" \
                         -H "Content-Type: multipart/form-data" \
                         -F "file=@$audio" \
                         -F "temperature=0.2" \
@@ -68,11 +73,11 @@ while true; do
     # to 5% or more. This can happen with poor recording equipment
     # or noisy environments with heaters and fans going.
 
-    rec -c 1 -r 22050 -t mp3 "$tmp" silence 1 0.1 2% 1 1.0 2%
+    rec -c 1 -r 16000 -t wav "$tmp" silence 1 0.01 "$SILENCE_THRESHOLD" 1 "$SILENCE_DURATION" "$SILENCE_THRESHOLD"
 
     # echo temporary audio file name to transcription queue
     echo "$tmp"
 done > "$audio_fifo" & #The `&` lets recording run in the background.
 
-# run audio transciption handler
+# run audio transcription handler
 trans
