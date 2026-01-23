@@ -21,15 +21,20 @@
 SERVER_URL="http://127.0.0.1:7777/inference"
 SILENCE_THRESHOLD="4%"   # volume level considered silence
 SILENCE_DURATION="1.5"   # seconds of silence before stopping
+PIDFILE="/tmp/voice_client.pid"
+
+# Write PID file
+echo $$ > "$PIDFILE"
 
 # fifo queue to hold temporary audio file names
 audio_fifo=$(mktemp); rm "$audio_fifo" ; mkfifo "$audio_fifo"
 
 ## create a trap to remove temp files on untimely exit
 cleanup() {
-    rm -f /tmp/tmp.txt "$audio_fifo"
+    rm -f /tmp/tmp.txt "$audio_fifo" "$PIDFILE"
+    kill $(jobs -p) 2>/dev/null
 }
-trap cleanup 0
+trap cleanup EXIT INT TERM
 
 # function to process audio files from queue
 trans(){
